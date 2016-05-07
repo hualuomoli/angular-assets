@@ -4,8 +4,6 @@ var gulp = require('gulp');
 var clean = require('gulp-clean');
 // 合并文件
 var concat = require('gulp-concat');
-// 添加文件哈希值(unicorn.css → unicorn-d41d8cd98f.css)
-var rev = require('gulp-rev');
 // 文件重命名
 var rename = require("gulp-rename");
 // 文件的原信息
@@ -58,11 +56,7 @@ gulp.task('coffee', function () {
     // sourcemaps结束
     .pipe(sourcemaps.write('.'))
     // 输出压缩文件
-    .pipe(gulp.dest('./dist/js'))
-    // 哈希
-    // .pipe(rev())
-    // 输出哈希文件
-    // .pipe(gulp.dest('./dist/js'));
+    .pipe(gulp.dest('./dist/js'));
 })
 
 // sass
@@ -96,11 +90,7 @@ gulp.task('scss', function () {
     // sourcemaps结束
     .pipe(sourcemaps.write('.'))
     // 输出压缩文件
-    .pipe(gulp.dest('./dist/css'))
-    // 哈希
-    // .pipe(rev())
-    // 输出哈希文件
-    // .pipe(gulp.dest('./dist/css'));
+    .pipe(gulp.dest('./dist/css'));
 })
 
 // 开始

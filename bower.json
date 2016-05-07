@@ -1,7 +1,6 @@
 {
   "name": "angular-assets",
   "description": "some tool for angular",
-  "main": "gulpfile.js",
   "authors": [
     "hualuomoli"
   ],
