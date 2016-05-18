@@ -1,12 +1,28 @@
-angular.module('hm', ['hm.device', 'hm.http', 'hm.load', 'hm.resource']);
+angular.module('hm', ['hm.bootstrap', 'hm.device', 'hm.http', 'hm.load', 'hm.resource']);
+
+angular.module('hm.bootstrap', []);
 
 angular.module('hm.device', []);
 
-angular.module('hm.http', []);
+angular.module('hm.http', ['hm.bootstrap']);
 
 angular.module('hm.load', []);
 
 angular.module('hm.resource', []);
+
+angular.module('hm.bootstrap').provider('hmBootstrapProvider', [
+  '$timeout', function($timeout) {
+    var _serverUrl, _tokenHeaders;
+    _serverUrl = '';
+    _tokenHeaders = {};
+    return this.$get = function() {
+      return {
+        serverUrl: _serverUrl,
+        tokenHeaders: _tokenHeaders
+      };
+    };
+  }
+]);
 
 angular.module('hm.device').factory('hmDevice', [
   '$window', function($window) {
@@ -33,10 +49,10 @@ angular.module('hm.device').factory('hmDevice', [
  * payload --> application/json
  */
 angular.module('hm.http').factory('hmHttp', [
-  '$http', 'serverUrl', 'tokenHeader', function($http, serverUrl, tokenHeader) {
+  '$http', 'hmBootstrap', function($http, hmBootstrap) {
     var _getHeaders, _getUrl, _seriliz;
     _getUrl = function(url) {
-      return serverUrl + url;
+      return hmBootstrap.serverUrl + url;
     };
     _seriliz = function(params) {
       params = !!params ? params : {};
@@ -51,7 +67,7 @@ angular.module('hm.http').factory('hmHttp', [
           method: 'GET',
           url: _getUrl(url),
           params: params,
-          headers: _getHeaders(this.tokenHeader)
+          headers: _getHeaders(hmBootstrap.tokenHeaders)
         });
       },
       post: function(url, params, headers) {
@@ -59,7 +75,7 @@ angular.module('hm.http').factory('hmHttp', [
           method: 'POST',
           url: _getUrl(url),
           data: _seriliz(params),
-          headers: _getHeaders(headers, this.tokenHeader, {
+          headers: _getHeaders(headers, hmBootstrap.tokenHeaders, {
             'Content-Type': 'application/x-www-form-urlencoded'
           })
         });
@@ -69,7 +85,7 @@ angular.module('hm.http').factory('hmHttp', [
           method: 'PUT',
           url: _getUrl(url),
           data: _seriliz(params),
-          headers: _getHeaders(headers, this.tokenHeader, {
+          headers: _getHeaders(headers, hmBootstrap.tokenHeaders, {
             'Content-Type': 'application/x-www-form-urlencoded'
           })
         });
@@ -79,7 +95,7 @@ angular.module('hm.http').factory('hmHttp', [
           method: 'POST',
           url: _getUrl(url),
           data: params,
-          headers: _getHeaders(headers, this.tokenHeader, {
+          headers: _getHeaders(headers, hmBootstrap.tokenHeaders, {
             'Content-Type': 'application/json'
           })
         });
@@ -88,7 +104,7 @@ angular.module('hm.http').factory('hmHttp', [
         return $http({
           method: 'DELETE',
           url: _getUrl(url),
-          headers: _getHeaders(this.tokenHeader)
+          headers: _getHeaders(hmBootstrap.tokenHeaders)
         });
       }
     };
