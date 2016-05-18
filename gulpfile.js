@@ -24,12 +24,9 @@ var autoprefixer = require('gulp-autoprefixer');
 // CSS压缩
 var cleanCSS = require('gulp-clean-css');
 
-// 输出目录
-var dist = './dist';
-
 // clean
 gulp.task('clean', function () {
-  return gulp.src(dist, {
+  return gulp.src('./dist', {
     read: false
   }).pipe(clean());
 });
@@ -49,7 +46,7 @@ gulp.task('coffee', function () {
     // 合并成一个文件
     .pipe(concat('hm.js'))
     // 输出源码文件
-    .pipe(gulp.dest(dist))
+    .pipe(gulp.dest('./dist/js'))
     // 压缩前修改文件名,增加.min
     .pipe(rename(function (path) {
       path.basename += '.min';
@@ -61,11 +58,11 @@ gulp.task('coffee', function () {
     // sourcemaps结束
     .pipe(sourcemaps.write('.'))
     // 输出压缩文件
-    .pipe(gulp.dest(dist))
+    .pipe(gulp.dest('./dist/js'))
     // 哈希
     .pipe(rev())
     // 输出哈希文件
-    .pipe(gulp.dest(dist));
+    .pipe(gulp.dest('./dist/js'));
 })
 
 // sass
@@ -87,7 +84,7 @@ gulp.task('scss', function () {
     // 合并成一个文件
     .pipe(concat('hm.css'))
     // 输出源码文件
-    .pipe(gulp.dest(dist))
+    .pipe(gulp.dest('./dist/css'))
     // 压缩前修改文件名,增加.min
     .pipe(rename(function (path) {
       path.basename += '.min';
@@ -99,11 +96,11 @@ gulp.task('scss', function () {
     // sourcemaps结束
     .pipe(sourcemaps.write('.'))
     // 输出压缩文件
-    .pipe(gulp.dest(dist))
+    .pipe(gulp.dest('./dist/css'))
     // 哈希
     .pipe(rev())
     // 输出哈希文件
-    .pipe(gulp.dest(dist));
+    .pipe(gulp.dest('./dist/css'));
 })
 
 // 开始
