@@ -1,3 +1,1 @@
-angular.module 'hm.http',[
-  'hm.bootstrap'
-]
+angular.module 'hm.http',[]

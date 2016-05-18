@@ -1,6 +1,6 @@
 angular
-.module 'hm.bootstrap'
-.provider 'hmBootstrapProvider',['$timeout', ($timeout)->
+.module 'hm'
+.provider 'hmProvider',['$timeout', ($timeout)->
   # 服务器项目URL
   _serverUrl = ''
   # 权限token的header信息
