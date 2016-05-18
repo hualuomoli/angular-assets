@@ -1,13 +1,14 @@
 angular
 .module 'hm'
-.provider 'hmProvider',['$timeout', ($timeout)->
+.provider 'hm', [()->
+
   # 服务器项目URL
-  _serverUrl = ''
+  this.serverUrl = ''
   # 权限token的header信息
-  _tokenHeaders = {}
+  this.tokenHeaders = {}
 
   this.$get = ()->
-    serverUrl: _serverUrl
-    tokenHeaders: _tokenHeaders
-
+    serverUrl: this.serverUrl
+    tokenHeaders: this.tokenHeaders
+  return
 ]

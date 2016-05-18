@@ -1,22 +1,21 @@
-angular.module('hm', ['hm.bootstrap', 'hm.device', 'hm.http', 'hm.load', 'hm.resource']);
+angular.module('hm', ['hm.device', 'hm.http', 'hm.load', 'hm.resource']);
 
 angular.module('hm.device', []);
 
-angular.module('hm.load', []);
-
 angular.module('hm.http', []);
+
+angular.module('hm.load', []);
 
 angular.module('hm.resource', []);
 
-angular.module('hm').provider('hmProvider', [
-  '$timeout', function($timeout) {
-    var _serverUrl, _tokenHeaders;
-    _serverUrl = '';
-    _tokenHeaders = {};
-    return this.$get = function() {
+angular.module('hm').provider('hm', [
+  function() {
+    this.serverUrl = '';
+    this.tokenHeaders = {};
+    this.$get = function() {
       return {
-        serverUrl: _serverUrl,
-        tokenHeaders: _tokenHeaders
+        serverUrl: this.serverUrl,
+        tokenHeaders: this.tokenHeaders
       };
     };
   }
