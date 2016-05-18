@@ -1,0 +1,35 @@
+.hm {
+  width: 100px;
+  -webkit-box-flex: 0;
+  -ms-flex: none;
+  flex: none;
+}
+
+.hm div {
+  -webkit-transform: myframe all 2s;
+  transform: myframe all 2s;
+}
+
+@-webkit-keyframes myframe() {
+  0% {
+    width: 200px;
+  }
+  50% {
+    width: 1000px;
+  }
+  100% {
+    width: 200px;
+  }
+}
+
+@keyframes myframe() {
+  0% {
+    width: 200px;
+  }
+  50% {
+    width: 1000px;
+  }
+  100% {
+    width: 200px;
+  }
+}

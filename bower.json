@@ -1,0 +1,24 @@
+{
+  "name": "angular-assets",
+  "description": "some tool for angular",
+  "main": "gulpfile.js",
+  "authors": [
+    "hualuomoli"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "angular",
+    "tool"
+  ],
+  "homepage": "https://github.com/hualuomoli/angular-assets",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^2.1.4"
+  }
+}

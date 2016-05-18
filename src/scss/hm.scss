@@ -1,0 +1,27 @@
+$width:100px;
+$w:0.5;
+
+.hm {
+  width: $width;
+  flex:none;
+
+  div{
+    transform: myframe all 2s;
+  }
+}
+
+@keyframes myframe(){
+  
+  0%{
+    width:200px;
+  }
+
+  50%{
+    width:1000px;
+  }
+
+  100%{
+    width:200px;
+  }
+
+}

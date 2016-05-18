@@ -1,0 +1,7 @@
+/node_modules
+/bower_components
+/npm-debug.log
+/src/**/*.js
+/src/**/*.js.map
+/src/**/*.css
+/src/**/*.css.map
