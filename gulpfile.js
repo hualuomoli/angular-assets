@@ -60,9 +60,9 @@ gulp.task('coffee', function () {
     // 输出压缩文件
     .pipe(gulp.dest('./dist/js'))
     // 哈希
-    .pipe(rev())
+    // .pipe(rev())
     // 输出哈希文件
-    .pipe(gulp.dest('./dist/js'));
+    // .pipe(gulp.dest('./dist/js'));
 })
 
 // sass
@@ -98,9 +98,9 @@ gulp.task('scss', function () {
     // 输出压缩文件
     .pipe(gulp.dest('./dist/css'))
     // 哈希
-    .pipe(rev())
+    // .pipe(rev())
     // 输出哈希文件
-    .pipe(gulp.dest('./dist/css'));
+    // .pipe(gulp.dest('./dist/css'));
 })
 
 // 开始

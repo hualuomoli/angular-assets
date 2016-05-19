@@ -12,13 +12,13 @@ angular.module('hm.resource', []);
 
 angular.module('hm').provider('hm', [
   function() {
-    this.config = {
+    this.defaults = {
       serverUrl: ''
     };
     this.tokenHeaders = {};
     this.$get = function() {
       return {
-        config: this.config
+        defaults: this.defaults
       };
     };
   }
@@ -52,7 +52,7 @@ angular.module('hm.http').factory('hmHttp', [
   '$http', 'hm', function($http, hm) {
     var _getHeaders, _getUrl, _seriliz;
     _getUrl = function(url) {
-      return hm.config.serverUrl + url;
+      return hm.defaults.serverUrl + url;
     };
     _seriliz = function(params) {
       params = !!params ? params : {};

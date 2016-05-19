@@ -12,7 +12,7 @@ angular
 	
 	# 获取服务端URL
 	_getUrl = (url)->
-		return hm.config.serverUrl + url
+		return hm.defaults.serverUrl + url
 	# 序列化
 	_seriliz = (params)->
 		params = if !!params then params else {}
