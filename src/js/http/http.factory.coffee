@@ -8,30 +8,29 @@
 ###
 angular
 .module 'hm.http'
-.factory 'hmHttp',['$http','hm',($http, hm)->
+.factory 'hmHttp',['$http','hm', ($http, hm)->
 	
 	# 获取服务端URL
 	_getUrl = (url)->
-		return hm.serverUrl + url
+		return hm.config.serverUrl + url
 	# 序列化
 	_seriliz = (params)->
 		params = if !!params then params else {}
-		$.param(params) 
+		return $.param(params) 
 	# 获取请求Header
 	_getHeaders = ()->
 		array = Array.prototype.slice.call(arguments);
 		validArray = []
 		array.forEach (ele)->
 			validArray[validArray.length] = ele if !!ele
-		angular.extend({}, validArray)
+		return angular.extend({}, validArray)
 
 	# get请求,获取数据
 	get: (url,params)->
 		$http({
 			method: 'GET',
 			url: _getUrl(url),
-			params: params,
-			headers: _getHeaders( hm.tokenHeaders)
+			params: params
 		})
 
 	# post请求,添加数据,由于angular默认使用application/json传输,所以需要设置header
@@ -40,7 +39,7 @@ angular
 			method: 'POST',
 			url: _getUrl(url),
 			data: _seriliz(params),
-			headers: _getHeaders(headers, hm.tokenHeaders,{
+			headers: _getHeaders(headers, {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			})
 		})
@@ -51,7 +50,7 @@ angular
 			method: 'PUT',
 			url: _getUrl(url),
 			data: _seriliz(params),
-			headers: _getHeaders(headers, hm.tokenHeaders,{
+			headers: _getHeaders(headers, {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			})
 		})
@@ -62,7 +61,7 @@ angular
 			method: 'POST',
 			url: _getUrl(url),
 			data: params,
-			headers: _getHeaders(headers, hm.tokenHeaders,{
+			headers: _getHeaders(headers, {
 				'Content-Type': 'application/json'
 			})
 		})	
@@ -71,8 +70,7 @@ angular
 	delete: (url)->
 		$http({
 			method: 'DELETE',
-			url: _getUrl(url),
-			headers: _getHeaders(hm.tokenHeaders)
+			url: _getUrl(url)
 		})	
 	
 ]

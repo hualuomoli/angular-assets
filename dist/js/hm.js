@@ -12,12 +12,13 @@ angular.module('hm.resource', []);
 
 angular.module('hm').provider('hm', [
   function() {
-    this.serverUrl = '';
+    this.config = {
+      serverUrl: ''
+    };
     this.tokenHeaders = {};
     this.$get = function() {
       return {
-        serverUrl: this.serverUrl,
-        tokenHeaders: this.tokenHeaders
+        config: this.config
       };
     };
   }
@@ -51,7 +52,7 @@ angular.module('hm.http').factory('hmHttp', [
   '$http', 'hm', function($http, hm) {
     var _getHeaders, _getUrl, _seriliz;
     _getUrl = function(url) {
-      return hm.serverUrl + url;
+      return hm.config.serverUrl + url;
     };
     _seriliz = function(params) {
       params = !!params ? params : {};
@@ -73,8 +74,7 @@ angular.module('hm.http').factory('hmHttp', [
         return $http({
           method: 'GET',
           url: _getUrl(url),
-          params: params,
-          headers: _getHeaders(hm.tokenHeaders)
+          params: params
         });
       },
       post: function(url, params, headers) {
@@ -82,7 +82,7 @@ angular.module('hm.http').factory('hmHttp', [
           method: 'POST',
           url: _getUrl(url),
           data: _seriliz(params),
-          headers: _getHeaders(headers, hm.tokenHeaders, {
+          headers: _getHeaders(headers, {
             'Content-Type': 'application/x-www-form-urlencoded'
           })
         });
@@ -92,7 +92,7 @@ angular.module('hm.http').factory('hmHttp', [
           method: 'PUT',
           url: _getUrl(url),
           data: _seriliz(params),
-          headers: _getHeaders(headers, hm.tokenHeaders, {
+          headers: _getHeaders(headers, {
             'Content-Type': 'application/x-www-form-urlencoded'
           })
         });
@@ -102,7 +102,7 @@ angular.module('hm.http').factory('hmHttp', [
           method: 'POST',
           url: _getUrl(url),
           data: params,
-          headers: _getHeaders(headers, hm.tokenHeaders, {
+          headers: _getHeaders(headers, {
             'Content-Type': 'application/json'
           })
         });
@@ -110,8 +110,7 @@ angular.module('hm.http').factory('hmHttp', [
       "delete": function(url) {
         return $http({
           method: 'DELETE',
-          url: _getUrl(url),
-          headers: _getHeaders(hm.tokenHeaders)
+          url: _getUrl(url)
         });
       }
     };

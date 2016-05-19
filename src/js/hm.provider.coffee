@@ -3,12 +3,13 @@ angular
 .provider 'hm', [()->
 
   # 服务器项目URL
-  this.serverUrl = ''
+  this.config = {
+    serverUrl: ''
+  }
   # 权限token的header信息
   this.tokenHeaders = {}
 
   this.$get = ()->
-    serverUrl: this.serverUrl
-    tokenHeaders: this.tokenHeaders
+    config: this.config
   return
 ]
