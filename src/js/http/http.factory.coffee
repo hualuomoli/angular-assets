@@ -18,8 +18,12 @@ angular
 		params = if !!params then params else {}
 		$.param(params) 
 	# 获取请求Header
-	_getHeaders = (headers)->
-		angular.extend({}, headers)
+	_getHeaders = ()->
+		array = Array.prototype.slice.call(arguments);
+		validArray = []
+		array.forEach (ele)->
+			validArray[validArray.length] = ele if !!ele
+		angular.extend({}, validArray)
 
 	# get请求,获取数据
 	get: (url,params)->

@@ -1,10 +1,12 @@
-angular.module('hm', ['hm.device', 'hm.http', 'hm.load', 'hm.resource']);
+angular.module('hm', ['hm.device', 'hm.load', 'hm.log', 'hm.http', 'hm.resource']);
 
 angular.module('hm.device', []);
 
 angular.module('hm.http', []);
 
 angular.module('hm.load', []);
+
+angular.module('hm.log', []);
 
 angular.module('hm.resource', []);
 
@@ -55,8 +57,16 @@ angular.module('hm.http').factory('hmHttp', [
       params = !!params ? params : {};
       return $.param(params);
     };
-    _getHeaders = function(headers) {
-      return angular.extend({}, headers);
+    _getHeaders = function() {
+      var array, validArray;
+      array = Array.prototype.slice.call(arguments);
+      validArray = [];
+      array.forEach(function(ele) {
+        if (!!ele) {
+          return validArray[validArray.length] = ele;
+        }
+      });
+      return angular.extend({}, validArray);
     };
     return {
       get: function(url, params) {
@@ -103,6 +113,36 @@ angular.module('hm.http').factory('hmHttp', [
           url: _getUrl(url),
           headers: _getHeaders(hm.tokenHeaders)
         });
+      }
+    };
+  }
+]);
+
+angular.module('hm.log').factory('hmLog', [
+  '$log', function($log) {
+    return {
+      debug: function() {
+        if ($log.isDebugEnabled()) {
+          return $log.debug(arguments);
+        }
+      },
+      info: function() {
+        if ($log.isInfoEnabled()) {
+          return $log.info(arguments);
+        }
+      },
+      warn: function() {
+        if ($log.isWarnEnabled()) {
+          return $log.warn(arguments);
+        }
+      },
+      error: function() {
+        return $log.error(arguments);
+      },
+      log: function() {
+        if ($log.isDebugEnabled()) {
+          return $log.debug(arguments);
+        }
       }
     };
   }
