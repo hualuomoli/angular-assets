@@ -10,8 +10,6 @@ angular.module('hm.log', []);
 
 angular.module('hm.resource', []);
 
-angular.module('hm.theme', []);
-
 angular.module('hm').provider('hm', [
   function() {
     this.defaults = {
@@ -21,19 +19,6 @@ angular.module('hm').provider('hm', [
     this.$get = function() {
       return {
         defaults: this.defaults
-      };
-    };
-  }
-]);
-
-angular.module('hm.theme').provider('hmTheme', [
-  function() {
-    this.config = {
-      theme: ''
-    };
-    return this.$get = function() {
-      return {
-        config: this.config
       };
     };
   }
