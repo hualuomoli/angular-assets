@@ -4,6 +4,7 @@ angular.module 'hm', [
   'hm.load',
 
   # 依赖angular存在
+  'hm.theme',
   'hm.log',
   'hm.http',
   'hm.resource'
