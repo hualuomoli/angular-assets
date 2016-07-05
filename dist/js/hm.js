@@ -1,4 +1,4 @@
-angular.module('hm', ['hm.device', 'hm.load', 'hm.theme', 'hm.log', 'hm.http', 'hm.resource']);
+angular.module('hm', ['hm.device', 'hm.load', 'hm.log', 'hm.http', 'hm.resource']);
 
 angular.module('hm.device', []);
 
