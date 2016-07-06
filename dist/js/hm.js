@@ -171,15 +171,13 @@ angular.module('hm.resource').factory('hmResource', [
 
 angular.module('hm.load').factory('hmLoad', [
   '$q', '$timeout', '$document', function($q, $timeout, $document) {
-    var _deferred, _loaded, _promise;
+    var _loaded;
     _loaded = [];
-    _promise = false;
-    _deferred = $q.defer();
     return {
       loadScript: function(src) {
         var deferred, script;
-        if (loaded[src]) {
-          return loaded[src].promise;
+        if (_loaded[src]) {
+          return _loaded[src].promise;
         }
         deferred = $q.defer();
         script = $document[0].createElement('script');
@@ -195,13 +193,13 @@ angular.module('hm.load').factory('hmLoad', [
           });
         };
         $document[0].body.appendChild(script);
-        loaded[src] = deferred;
+        _loaded[src] = deferred;
         return deferred.promise;
       },
       loadCSS: function(href) {
         var deferred, style;
-        if (loaded[href]) {
-          return loaded[href].promise;
+        if (_loaded[href]) {
+          return _loaded[href].promise;
         }
         deferred = $q.defer();
         style = $document[0].createElement('link');
@@ -219,16 +217,15 @@ angular.module('hm.load').factory('hmLoad', [
           });
         };
         $document[0].body.appendChild(script);
-        loaded[href] = deferred;
+        _loaded[href] = deferred;
         return deferred.promise;
       },
       load: function(srcs) {
-        var promise, self;
+        var deferred, promise, self;
         srcs = angular.isArray(srcs) ? srcs : srcs.split(/\s+/);
         self = this;
-        if (!promise) {
-          promise = deferred.promise;
-        }
+        deferred = $q.defer();
+        promise = deferred.promise;
         angular.forEach(srcs, function(src) {
           return promise = promise.then(function() {
             if (src.indexOf('.css') >= 0) {

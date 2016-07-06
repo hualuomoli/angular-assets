@@ -4,12 +4,12 @@ angular
 
   # 已经加载的数组
   _loaded = []
-  _promise = false
-  _deferred = $q.defer();
+  # _promise = false
+  # _deferred = $q.defer();
   
   # 加载JS
   loadScript: (src)->
-    return loaded[src].promise if loaded[src]
+    return _loaded[src].promise if _loaded[src]
 
     deferred = $q.defer();
     script = $document[0].createElement('script')
@@ -23,13 +23,13 @@ angular
       $timeout ()->
         deferred.reject(e)
     $document[0].body.appendChild(script)
-    loaded[src] = deferred
+    _loaded[src] = deferred
 
     return deferred.promise
 
   # 加载css
   loadCSS: (href) ->
-    return loaded[href].promise if loaded[href]
+    return _loaded[href].promise if _loaded[href]
 
     deferred = $q.defer();
     style = $document[0].createElement('link')
@@ -45,7 +45,7 @@ angular
       $timeout ()->
         deferred.reject(e)
     $document[0].body.appendChild(script)
-    loaded[href] = deferred
+    _loaded[href] = deferred
 
     return deferred.promise;
 
@@ -54,8 +54,9 @@ angular
     srcs = if angular.isArray(srcs)  then srcs else srcs.split(/\s+/) 
 
     self = this;
-
-    promise = deferred.promise if !promise
+    
+    deferred = $q.defer();
+    promise = deferred.promise
 
     angular.forEach srcs, (src)->
       promise = promise.then ()->
