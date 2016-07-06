@@ -1,20 +1,14 @@
-angular.module('hm', ['hm.device', 'hm.ui.load', 'hm.directive', 'hm.log', 'hm.http', 'hm.resource']);
-
-
-/*
- * 通用指令
- */
-angular.module('hm.directive', []);
+angular.module('hm', ['hm.device', 'hm.ui.load', 'hm.log', 'hm.http', 'hm.resource', 'hm.ui.jq', 'hm.ui.screenfull', 'hm.ui.toggleClass']);
 
 angular.module('hm.device', []);
 
 angular.module('hm.http', []);
 
-angular.module('hm.ui.load', []);
-
 angular.module('hm.log', []);
 
 angular.module('hm.resource', []);
+
+angular.module('hm.ui.load', []);
 
 angular.module('hm').provider('hm', [
   function() {
@@ -250,22 +244,9 @@ angular.module('hm.ui.load').factory('hmUiLoad', [
 
 
 /*
- * 0.1.1
- * General-purpose jQuery wrapper. Simply pass the plugin name as the expression.
- *
- * It is possible to specify a default set of parameters for each jQuery plugin.
- * Under the jq key, namespace each plugin by that which will be passed to ui-jq.
- * Unfortunately, at this time you can only pre-define the first parameter.
- * @example { jq : { datepicker : { showOn:'click' } } }
- *
- * @param ui-jq {string} The $elm.[pluginName]() to call.
- * @param [ui-options] {mixed} Expression to be evaluated and passed as options to the function
- *     Multiple parameters can be separated by commas
- * @param [ui-refresh] {expression} Watch expression and refire plugin on changes
- *
- * @example <input ui-jq="datepicker" ui-options="{showOn:'click'},secondParameter,thirdParameter" ui-refresh="iChange">
+ * 调用 jquery 的plugin 插件
  */
-angular.module('hm.directive').directive('hmUiJq', [
+angular.module('hm.ui.jq', ['hm.ui.load', 'hm.log']).directive('hmUiJq', [
   'hmUiLoad', 'hmLog', 'JQ_ASSETS_LIB', '$timeout', function(hmUiLoad, hmLog, JQ_ASSETS_LIB, $timeout) {
     var hmUiJqCompilingFunction;
     return {
@@ -314,6 +295,69 @@ angular.module('hm.directive').directive('hmUiJq', [
             return refresh();
           }
         };
+      }
+    };
+  }
+]);
+
+
+/*
+ * 全屏
+ */
+angular.module('hm.ui.screenfull', ['hm.ui.load']).directive('hmUiScreenfull', [
+  'hmUiLoad', 'ASSETS_LIB', '$document', function(hmUiLoad, ASSETS_LIB, $document) {
+    return {
+      restrict: 'AC',
+      template: '<i class="fa fa-expand fa-fw text"></i><i class="fa fa-compress fa-fw text-active"></i>',
+      link: function(scope, ele, attrs) {
+        ele.addClass('hide');
+        return hmUiLoad.load(ASSETS_LIB.screenfull).then(function() {
+          var screenfull;
+          screenfull = window.screenfull;
+          if (screenfull.enabled && !navigator.userAgent.match(/Trident.*rv:11\./)) {
+            ele.removeClass('hide');
+          }
+          ele.on('click', function() {
+            var target;
+            attrs.target && (target = $(attrs.target)[0]);
+            return screenfull.toggle(target);
+          });
+          return $document.on(screenfull.raw.fullscreenchange, function() {
+            if (screenfull.isFullscreen) {
+              return ele.addClass('active');
+            } else {
+              return ele.removeClass('active');
+            }
+          });
+        });
+      }
+    };
+  }
+]);
+
+
+/*
+ * 点击指令的元素,让target对应元素toggle样式
+ */
+angular.module('hm.ui.toggleClass', []).directive('hmUiToggleClass', [
+  function() {
+    return {
+      restrict: 'AC',
+      link: function(scope, ele, attrs) {
+        return ele.on('click', function(e) {
+          var classes, key, targets;
+          e.preventDefault();
+          classes = attrs.hmUiToggleClass.split(',');
+          targets = attrs.target ? attrs.target.split(',') : Array(ele);
+          key = 0;
+          angular.forEach(classes, function(_class) {
+            var target;
+            target = targets[targets.length && key];
+            $(target).toggleClass(_class);
+            return key += 1;
+          });
+          return $(ele).toggleClass('active');
+        });
       }
     };
   }

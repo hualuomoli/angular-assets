@@ -32,11 +32,11 @@ gulp.task('clean', function () {
 // coffee
 gulp.task('coffee', function () {
   return gulp.src([
-      './src/**/*.module.coffee', // module
-      './src/**/*.provider.coffee', // provider
-      './src/**/*.factory.coffee', // factory
-      './src/**/*.service.coffee', // service
-      './src/**/*.directive.coffee' // directive
+      './src/coffee/**/*.module.coffee', // module
+      './src/coffee/**/*.provider.coffee', // provider
+      './src/coffee/**/*.factory.coffee', // factory
+      './src/coffee/**/*.service.coffee', // service
+      './src/coffee/directives/*.coffee' // directive
     ])
     // coffee
     .pipe(coffee({
