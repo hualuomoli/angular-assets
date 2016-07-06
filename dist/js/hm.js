@@ -221,6 +221,25 @@ angular.module('hm.load').factory('hmLoad', [
         $document[0].body.appendChild(script);
         loaded[href] = deferred;
         return deferred.promise;
+      },
+      load: function(srcs) {
+        var promise, self;
+        srcs = angular.isArray(srcs) ? srcs : srcs.split(/\s+/);
+        self = this;
+        if (!promise) {
+          promise = deferred.promise;
+        }
+        angular.forEach(srcs, function(src) {
+          return promise = promise.then(function() {
+            if (src.indexOf('.css') >= 0) {
+              return self.loadCSS(src);
+            } else {
+              return self.loadScript(src);
+            }
+          });
+        });
+        deferred.resolve();
+        return promise;
       }
     };
   }

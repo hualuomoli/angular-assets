@@ -49,4 +49,21 @@ angular
 
     return deferred.promise;
 
+  # 加载
+  load: (srcs)->
+    srcs = if angular.isArray(srcs)  then srcs else srcs.split(/\s+/) 
+
+    self = this;
+
+    promise = deferred.promise if !promise
+
+    angular.forEach srcs, (src)->
+      promise = promise.then ()->
+        return if src.indexOf('.css') >=0 then self.loadCSS(src) else self.loadScript(src)
+
+    # 
+    deferred.resolve()
+
+    return promise;
+
 ]
