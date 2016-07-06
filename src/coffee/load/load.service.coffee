@@ -1,6 +1,6 @@
 angular
-.module 'hm.load'
-.factory 'hmLoad', ['$q', '$timeout', '$document', ($q, $timeout, $document)->
+.module 'hm.ui.load'
+.factory 'hmUiLoad', ['$q', '$timeout', '$document', ($q, $timeout, $document)->
 
   # 已经加载的数组
   _loaded = []

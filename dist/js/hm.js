@@ -1,10 +1,16 @@
-angular.module('hm', ['hm.device', 'hm.load', 'hm.log', 'hm.http', 'hm.resource']);
+angular.module('hm', ['hm.device', 'hm.ui.load', 'hm.directive', 'hm.log', 'hm.http', 'hm.resource']);
+
+
+/*
+ * 通用指令
+ */
+angular.module('hm.directive', []);
 
 angular.module('hm.device', []);
 
 angular.module('hm.http', []);
 
-angular.module('hm.load', []);
+angular.module('hm.ui.load', []);
 
 angular.module('hm.log', []);
 
@@ -169,7 +175,7 @@ angular.module('hm.resource').factory('hmResource', [
   }
 ]);
 
-angular.module('hm.load').factory('hmLoad', [
+angular.module('hm.ui.load').factory('hmUiLoad', [
   '$q', '$timeout', '$document', function($q, $timeout, $document) {
     var _loaded;
     _loaded = [];
@@ -237,6 +243,77 @@ angular.module('hm.load').factory('hmLoad', [
         });
         deferred.resolve();
         return promise;
+      }
+    };
+  }
+]);
+
+
+/*
+ * 0.1.1
+ * General-purpose jQuery wrapper. Simply pass the plugin name as the expression.
+ *
+ * It is possible to specify a default set of parameters for each jQuery plugin.
+ * Under the jq key, namespace each plugin by that which will be passed to ui-jq.
+ * Unfortunately, at this time you can only pre-define the first parameter.
+ * @example { jq : { datepicker : { showOn:'click' } } }
+ *
+ * @param ui-jq {string} The $elm.[pluginName]() to call.
+ * @param [ui-options] {mixed} Expression to be evaluated and passed as options to the function
+ *     Multiple parameters can be separated by commas
+ * @param [ui-refresh] {expression} Watch expression and refire plugin on changes
+ *
+ * @example <input ui-jq="datepicker" ui-options="{showOn:'click'},secondParameter,thirdParameter" ui-refresh="iChange">
+ */
+angular.module('hm.directive').directive('hmUiJq', [
+  'hmUiLoad', 'hmLog', 'JQ_ASSETS_LIB', '$timeout', function(hmUiLoad, hmLog, JQ_ASSETS_LIB, $timeout) {
+    var hmUiJqCompilingFunction;
+    return {
+      restrict: 'A',
+      compile: hmUiJqCompilingFunction = function(ele, attrs) {
+        var hmUiJqLinkingFunction;
+        if (!angular.isFunction(ele[attrs.hmUiJq]) && !JQ_ASSETS_LIB[attrs.hmUiJq]) {
+          throw new Error('hm-ui-jq: The "' + attrs.hmUiJq + '" function does not exist');
+        }
+        return hmUiJqLinkingFunction = function(scope, ele, attrs) {
+          var callPlugin, getOptions, refresh;
+          getOptions = function() {
+            var linkOptions;
+            linkOptions = [];
+            if (attrs.uiOptions) {
+              linkOptions = scope.$eval('[' + attrs.uiOptions + ']');
+            }
+            return linkOptions;
+          };
+          callPlugin = function() {
+            return $timeout((function() {
+              return ele[attrs.hmUiJq].apply(ele, getOptions());
+            }), 0, false);
+          };
+          refresh = function() {
+            if (attrs.uiRefresh) {
+              return scope.$watch(attrs.uiRefresh, function() {
+                return callPlugin();
+              });
+            }
+          };
+          if (attrs.ngModel && ele.is('select,input,textarea')) {
+            ele.bind('change', function() {
+              return ele.trigger('input');
+            });
+          }
+          if (JQ_ASSETS_LIB[attrs.hmUiJq]) {
+            return hmUiLoad.load(JQ_ASSETS_LIB[attrs.hmUiJq]).then(function() {
+              callPlugin();
+              return refresh();
+            })["catch"](function(e) {
+              return hmLog.warn(e);
+            });
+          } else {
+            callPlugin();
+            return refresh();
+          }
+        };
       }
     };
   }

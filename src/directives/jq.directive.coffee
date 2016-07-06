@@ -14,9 +14,8 @@
 #
 # @example <input ui-jq="datepicker" ui-options="{showOn:'click'},secondParameter,thirdParameter" ui-refresh="iChange">
 ###
-angular.module 'hm'
-.value('uiJqConfig', {})
-.directive 'hmUiJq', ['hmLoad', 'hmLog', 'JQ_ASSETS_LIB', 'uiJqConfig', '$timeout', (hmLoad, hmLog, JQ_ASSETS_LIB, uiJqConfig, $timeout)->
+angular.module 'hm.directive'
+.directive 'hmUiJq', ['hmUiLoad', 'hmLog', 'JQ_ASSETS_LIB', '$timeout', (hmUiLoad, hmLog, JQ_ASSETS_LIB, $timeout)->
 
   restrict: 'A',
   compile: hmUiJqCompilingFunction = (ele, attrs)->
@@ -24,9 +23,6 @@ angular.module 'hm'
     # 如果配置的指令不是方法,也不是要加载的资源,错误
     throw new Error('hm-ui-jq: The "' + attrs.hmUiJq + '" function does not exist') if !angular.isFunction(ele[attrs.hmUiJq]) && !JQ_ASSETS_LIB[attrs.hmUiJq]
     
-    # 
-    options = uiJqConfig && uiJqConfig[attrs.hmUiJq];    
-
     # 链接
     hmUiJqLinkingFunction = (scope, ele, attrs)->
 
@@ -37,10 +33,8 @@ angular.module 'hm'
         # If ui-options are passed, merge (or override) them onto global defaults and pass to the jQuery method
         if attrs.uiOptions
           linkOptions = scope.$eval('[' + attrs.uiOptions + ']')
-          if angular.isObject(options) && angular.isObject(linkOptions[0])
-            linkOptions[0] = angular.extend({}, options, linkOptions[0])
-        else if options
-          linkOptions = [options]
+
+        return linkOptions
 
       # Call jQuery method and pass relevant options
       callPlugin = ()->
@@ -60,7 +54,7 @@ angular.module 'hm'
           ele.trigger('input');
 
       if JQ_ASSETS_LIB[attrs.hmUiJq]
-        hmLoad.load(JQ_ASSETS_LIB[attrs.hmUiJq])
+        hmUiLoad.load(JQ_ASSETS_LIB[attrs.hmUiJq])
         .then ()->
           callPlugin()
           refresh()

@@ -1,1 +1,1 @@
-angular.module 'hm.load', []
+angular.module 'hm.ui.load', []
