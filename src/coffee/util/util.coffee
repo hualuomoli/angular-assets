@@ -9,7 +9,7 @@ angular.module 'hm.util', [
   _self = this
 
   # 数组
-  array: ()->
+  _self.array = {
     # 复制
     copy: (datas)->
       _datas = []
@@ -40,10 +40,11 @@ angular.module 'hm.util', [
       return datas
 
     # end array
+  }
 
 
   # Object
-  object: ()->
+  _self.object = {
     # 复制
     copy: (data)->
       _data = {}
@@ -89,10 +90,12 @@ angular.module 'hm.util', [
 
 
     # end object
- 
+  }
+
+
   # tree
-  tree: ()->
-    # 解析
+  _self.tree = {
+    # 解析,返回树列表
     parse: (datas, config)->
       # 默认配置
       defaultConfig = {
@@ -157,5 +160,31 @@ angular.module 'hm.util', [
         return _result
 
       return _parse()
+
+    # 叶子节点
+    leaf: (treeDatas)->
+      
+      _datas = []
+      
+      return _datas if !angular.isArray treeDatas
+
+      _leaf = (treeDatas)->
+
+        for data in treeDatas
+          # 非叶子节点，处理子节点
+          _leaf data.children if data.leaf != 'Y'
+          # 添加当前节点
+          _datas[_datas.length] = data
+
+        return _datas
+
+      return _leaf(treeDatas)
+
+
+  }
+
+  array: _self.array
+  object: _self.object
+  tree : _self.tree
 
 ]

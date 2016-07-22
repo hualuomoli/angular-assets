@@ -6,142 +6,158 @@ angular.module('hm.util', []).factory('hmUtils', [
   function() {
     var _self;
     _self = this;
-    return {
-      array: function() {
-        return {
-          copy: function(datas) {
-            var _datas, data, k, len;
-            _datas = [];
-            if (!angular.isArray(datas)) {
-              return _datas;
-            }
-            for (k = 0, len = datas.length; k < len; k++) {
-              data = datas[k];
-              _datas[_datas.length] = _self.object.copy(data);
-            }
-            return _datas;
-          },
-          sort: function(datas, callback) {
-            var _temp, d1, d2, i, j, k, l, len, len1;
-            if (!angular.isArray(datas)) {
-              return datas;
-            }
-            for (i = k = 0, len = datas.length; k < len; i = ++k) {
-              d1 = datas[i];
-              for (j = l = 0, len1 = datas.length; l < len1; j = ++l) {
-                d2 = datas[j];
-                if (j > i && callback(d1, d2)) {
-                  _temp = datas[i];
-                  datas[i] = datas[j];
-                  datas[j] = _temp;
-                }
-              }
-            }
-            return datas;
-          }
-        };
+    _self.array = {
+      copy: function(datas) {
+        var _datas, data, k, len;
+        _datas = [];
+        if (!angular.isArray(datas)) {
+          return _datas;
+        }
+        for (k = 0, len = datas.length; k < len; k++) {
+          data = datas[k];
+          _datas[_datas.length] = _self.object.copy(data);
+        }
+        return _datas;
       },
-      object: function() {
-        return {
-          copy: function(data) {
-            var _data, key, value;
-            _data = {};
-            if (!angular.isObject(data)) {
-              return _data;
+      sort: function(datas, callback) {
+        var _temp, d1, d2, i, j, k, l, len, len1;
+        if (!angular.isArray(datas)) {
+          return datas;
+        }
+        for (i = k = 0, len = datas.length; k < len; i = ++k) {
+          d1 = datas[i];
+          for (j = l = 0, len1 = datas.length; l < len1; j = ++l) {
+            d2 = datas[j];
+            if (j > i && callback(d1, d2)) {
+              _temp = datas[i];
+              datas[i] = datas[j];
+              datas[j] = _temp;
             }
-            for (key in data) {
-              value = data[key];
-              if (angular.isArray(value)) {
-                _data[key] = _self.array.copy(value);
-              }
-              if (angular.isObject(value)) {
-                _data[key] = _self.object.copy(value);
-              }
-              _data[key] = value;
-            }
-            return _data;
-          },
-          replace: function(data, config) {
-            var _data, _key, _temp, _value, key;
-            _data = _self.object.copy(data);
-            if (!!config) {
-              return _data;
-            }
-            _temp = {};
-            for (key in config) {
-              _key = config[key];
-              _value = _data[_key];
-              if (!!_value) {
-                _temp[key] = _value;
-                delete _data(_key);
-              }
-            }
-            for (key in _temp) {
-              _data[key] = _temp[key];
-            }
-            return _data;
           }
-        };
-      },
-      tree: function() {
-        return {
-          parse: function(datas, config) {
-            var _addChild, _config, _datas, _parse, defaultConfig;
-            defaultConfig = {
-              "code": 'code',
-              "pcode": 'pcode',
-              "sort": "sort",
-              "sorts": function(d1, d2) {
-                return d1[this.sort] >= d2[this.sort];
-              }
-            };
-            if (!angular.isArray(datas)) {
-              return datas;
-            }
-            _config = angular.extend({}, defaultConfig, config);
-            _datas = _self.array.copy(datas);
-            _addChild = function(pData) {
-              var _children, _data, child, index, k, l, len, len1;
-              _children = [];
-              for (k = 0, len = _datas.length; k < len; k++) {
-                _data = _datas[k];
-                if (!!_data[_config.pcode] && !!pData[_config.code] && _data[_config.pcode] === pData[_config.code]) {
-                  _children.push(_data);
-                  _data.level = pData.level + 1;
-                  _addChild(_data);
-                }
-              }
-              pData.leaf = _children.length > 0 ? 'N' : 'Y';
-              _children = _self.array.sort(_children, _config.sorts);
-              for (index = l = 0, len1 = _children.length; l < len1; index = ++l) {
-                child = _children[index];
-                child.sort = index + 1;
-              }
-              pData.children = _children;
-              return pData;
-            };
-            _parse = function() {
-              var _data, _result, index, k, l, len, len1, r;
-              _result = [];
-              for (k = 0, len = _datas.length; k < len; k++) {
-                _data = _datas[k];
-                if (!_data[_config.pcode] || _data[_config.pcode] === '') {
-                  _data.level = 1;
-                  _result.push(_data);
-                  _addChild(_data);
-                }
-              }
-              _self.array.sort(_result, _config.sorts);
-              for (index = l = 0, len1 = _result.length; l < len1; index = ++l) {
-                r = _result[index];
-                r.sort = index + 1;
-              }
-              return _result;
-            };
-            return _parse();
-          }
-        };
+        }
+        return datas;
       }
+    };
+    _self.object = {
+      copy: function(data) {
+        var _data, key, value;
+        _data = {};
+        if (!angular.isObject(data)) {
+          return _data;
+        }
+        for (key in data) {
+          value = data[key];
+          if (angular.isArray(value)) {
+            _data[key] = _self.array.copy(value);
+          }
+          if (angular.isObject(value)) {
+            _data[key] = _self.object.copy(value);
+          }
+          _data[key] = value;
+        }
+        return _data;
+      },
+      replace: function(data, config) {
+        var _data, _key, _temp, _value, key;
+        _data = _self.object.copy(data);
+        if (!!config) {
+          return _data;
+        }
+        _temp = {};
+        for (key in config) {
+          _key = config[key];
+          _value = _data[_key];
+          if (!!_value) {
+            _temp[key] = _value;
+            delete _data(_key);
+          }
+        }
+        for (key in _temp) {
+          _data[key] = _temp[key];
+        }
+        return _data;
+      }
+    };
+    _self.tree = {
+      parse: function(datas, config) {
+        var _addChild, _config, _datas, _parse, defaultConfig;
+        defaultConfig = {
+          "code": 'code',
+          "pcode": 'pcode',
+          "sort": "sort",
+          "sorts": function(d1, d2) {
+            return d1[this.sort] >= d2[this.sort];
+          }
+        };
+        if (!angular.isArray(datas)) {
+          return datas;
+        }
+        _config = angular.extend({}, defaultConfig, config);
+        _datas = _self.array.copy(datas);
+        _addChild = function(pData) {
+          var _children, _data, child, index, k, l, len, len1;
+          _children = [];
+          for (k = 0, len = _datas.length; k < len; k++) {
+            _data = _datas[k];
+            if (!!_data[_config.pcode] && !!pData[_config.code] && _data[_config.pcode] === pData[_config.code]) {
+              _children.push(_data);
+              _data.level = pData.level + 1;
+              _addChild(_data);
+            }
+          }
+          pData.leaf = _children.length > 0 ? 'N' : 'Y';
+          _children = _self.array.sort(_children, _config.sorts);
+          for (index = l = 0, len1 = _children.length; l < len1; index = ++l) {
+            child = _children[index];
+            child.sort = index + 1;
+          }
+          pData.children = _children;
+          return pData;
+        };
+        _parse = function() {
+          var _data, _result, index, k, l, len, len1, r;
+          _result = [];
+          for (k = 0, len = _datas.length; k < len; k++) {
+            _data = _datas[k];
+            if (!_data[_config.pcode] || _data[_config.pcode] === '') {
+              _data.level = 1;
+              _result.push(_data);
+              _addChild(_data);
+            }
+          }
+          _self.array.sort(_result, _config.sorts);
+          for (index = l = 0, len1 = _result.length; l < len1; index = ++l) {
+            r = _result[index];
+            r.sort = index + 1;
+          }
+          return _result;
+        };
+        return _parse();
+      },
+      leaf: function(treeDatas) {
+        var _datas, _leaf;
+        _datas = [];
+        if (!angular.isArray(treeDatas)) {
+          return _datas;
+        }
+        _leaf = function(treeDatas) {
+          var data, k, len;
+          for (k = 0, len = treeDatas.length; k < len; k++) {
+            data = treeDatas[k];
+            if (data.leaf !== 'Y') {
+              _leaf(data.children);
+            }
+            _datas[_datas.length] = data;
+          }
+          return _datas;
+        };
+        return _leaf(treeDatas);
+      }
+    };
+    return {
+      array: _self.array,
+      object: _self.object,
+      tree: _self.tree
     };
   }
 ]);
