@@ -32,11 +32,12 @@ gulp.task('clean', function () {
 // coffee
 gulp.task('coffee', function () {
   return gulp.src([
+      './src/coffee/util/*.coffee', // util
       './src/coffee/**/*.module.coffee', // module
       './src/coffee/**/*.provider.coffee', // provider
       './src/coffee/**/*.factory.coffee', // factory
       './src/coffee/**/*.service.coffee', // service
-      './src/coffee/directives/*.coffee' // directive
+      './src/coffee/directives/*.coffee', // directive
     ])
     // coffee
     .pipe(coffee({
