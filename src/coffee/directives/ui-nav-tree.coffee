@@ -2,15 +2,14 @@
 # hm-nav-tree
 #
 angular.module 'hm.ui.nav.tree', [
-
+  'ngAnimate'
 ]
 .directive 'hmNavTree', ['$timeout', '$parse', ($timeout, $parse)->
 
   restrict: 'E'
   template: """
             <ul class="nav nav-list nav-pills nav-stacked hm-nav-tree">
-              <li ng-repeat="row in tree_rows | filter:{visible:true}"
-                  ng-animate="'abn-tree-animate'" 
+              <li ng-repeat="row in tree_rows | filter:{visible:true} track by row.branch.uid"
                   ng-class="'level-{{row.branch.level}}' + (row.branch.selected ? ' active':'') + ' ' +row.branch.classes.join(' ')" 
                   class="nav-tree-row">
                 <a ng-click="user_select_branch(row.branch)">
@@ -208,8 +207,8 @@ angular.module 'hm.ui.nav.tree', [
     collapse_children = (branch)->
       branch.expanded = false
       for_each_child branch, (b)->
-        b.expanded = false
         b.visible = false
+        b.expanded = false
 
 
     expand_branch = (branch)->
