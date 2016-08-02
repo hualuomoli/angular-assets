@@ -162,7 +162,7 @@ angular.module('hm.util', []).factory('hmUtils', [
   }
 ]);
 
-angular.module('hm', ['hm.device', 'hm.log', 'hm.http', 'hm.resource', 'hm.ui.load', 'hm.ui.jq', 'hm.ui.screenfull', 'hm.ui.toggleClass', 'hm.util']);
+angular.module('hm', ['hm.device', 'hm.log', 'hm.http', 'hm.resource', 'hm.ui.load', 'hm.ui.jq', 'hm.ui.screenfull', 'hm.ui.toggleClass', 'hm.ui.nav.tree', 'hm.util']);
 
 angular.module('hm.device', []);
 
@@ -459,6 +459,539 @@ angular.module('hm.ui.jq', ['hm.ui.load', 'hm.log']).directive('hmUiJq', [
             return refresh();
           }
         };
+      }
+    };
+  }
+]);
+
+angular.module('hm.ui.nav.tree', []).directive('hmNavTree', [
+  '$timeout', '$parse', function($timeout, $parse) {
+    return {
+      restrict: 'E',
+      template: "<ul class=\"nav nav-list nav-pills nav-stacked hm-nav-tree\">\n  <li ng-repeat=\"row in tree_rows | filter:{visible:true}\"\n      ng-animate=\"'abn-tree-animate'\" \n      ng-class=\"'level-{{row.branch.level}}' + (row.branch.selected ? ' active':'') + ' ' +row.branch.classes.join(' ')\" \n      class=\"nav-tree-row\">\n    <a ng-click=\"user_select_branch(row.branch)\">\n      <i ng-class=\"row.branch.tree_check_icon\" \n         ng-click=\"user_check_branch(row.branch)\" \n         class=\"indented\" ng-show=\"tree_type == 'checkbox'\"> \n      </i>\n      <i ng-class=\"row.branch.tree_radio_icon\" \n         ng-click=\"user_radio_branch(row.branch)\" \n         class=\"indented\" ng-show=\"tree_type == 'radio'\"> \n      </i>\n      <i ng-class=\"row.branch.tree_icon\" \n         ng-click=\"user_expand_branch(row.branch)\" \n         class=\"indented\"> \n      </i>\n      <span class=\"indented tree-label\">{{ row.branch.label }} </span>\n    </a>\n  </li>\n</ul>",
+      scope: {
+        treeData: '=',
+        onSelect: '&',
+        onCheck: '&',
+        onRadio: '&',
+        loadData: '&',
+        initSelect: '@',
+        initRadio: '@',
+        initCheck: '@',
+        treeControl: '='
+      },
+      link: function(scope, element, attrs) {
+        var c_check_some, c_checked, c_tree_type_checkbox, c_tree_type_radio, c_tree_type_select, c_unchecked, check_children, checker_parent, checkes, collapse_children, expand_branch, expanded_child, expanded_parent, for_each_branch, for_each_child, for_each_parent, get_checked, get_parent, on_treeData_change, radio_branch, radioed_branch, select_branch, selected_branch, tree, uid, uncheck_children;
+        if (attrs.iconExpand == null) {
+          attrs.iconExpand = 'fa fa-plus';
+        }
+        if (attrs.iconCollapse == null) {
+          attrs.iconCollapse = 'fa fa-minus';
+        }
+        if (attrs.iconLeaf == null) {
+          attrs.iconLeaf = 'fa fa-file';
+        }
+        if (attrs.iconChecked == null) {
+          attrs.iconChecked = 'fa fa-check-square';
+        }
+        if (attrs.iconUnchecked == null) {
+          attrs.iconUnchecked = 'fa fa-square-o';
+        }
+        if (attrs.iconSomeChecked == null) {
+          attrs.iconSomeChecked = 'fa fa-square';
+        }
+        if (attrs.iconRadioed == null) {
+          attrs.iconRadioed = 'fa fa-check-circle';
+        }
+        if (attrs.iconunRadioed == null) {
+          attrs.iconunRadioed = 'fa fa-circle-o';
+        }
+        if (attrs.iconRadioForbid == null) {
+          attrs.iconRadioForbid = 'fa fa-ban fa-flip-horizontal';
+        }
+        if (attrs.radioOnlyLeaf == null) {
+          attrs.radioOnlyLeaf = true;
+        }
+        if (attrs.lazyLoad == null) {
+          attrs.lazyLoad = false;
+        }
+        if (attrs.treeType == null) {
+          attrs.treeType = 'select';
+        }
+        c_checked = 2;
+        c_check_some = 1;
+        c_unchecked = 0;
+        c_tree_type_select = 'select';
+        c_tree_type_checkbox = 'checkbox';
+        c_tree_type_radio = 'radio';
+        selected_branch = null;
+        radioed_branch = null;
+        scope.tree_rows = [];
+        scope.tree_type = attrs.treeType;
+        get_parent = function(branch) {
+          var parent;
+          parent = void 0;
+          if (branch.parent_uid) {
+            for_each_branch(function(b) {
+              if (b.uid === branch.parent_uid) {
+                return parent = b;
+              }
+            });
+          }
+          return parent;
+        };
+        for_each_child = function(branch, fn) {
+          var do_f;
+          do_f = function(branch) {
+            var child, i, len, ref, results;
+            if (!!branch.children && branch.children.length > 0) {
+              ref = branch.children;
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                child = ref[i];
+                fn(child, branch);
+                results.push(do_f(child));
+              }
+              return results;
+            }
+          };
+          return do_f(branch);
+        };
+        for_each_parent = function(branch, fn) {
+          var do_f;
+          do_f = function(branch) {
+            var parent;
+            parent = get_parent(branch);
+            if (!!parent) {
+              fn(parent, branch);
+              return do_f(parent);
+            }
+          };
+          return do_f(branch);
+        };
+        for_each_branch = function(fn) {
+          var i, len, ref, results, root_branch;
+          ref = scope.treeData;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            root_branch = ref[i];
+            fn(root_branch);
+            results.push(for_each_child(root_branch, function(b, p) {
+              return fn(b, p);
+            }));
+          }
+          return results;
+        };
+        select_branch = function(branch) {
+          if (selected_branch != null) {
+            selected_branch.selected = false;
+            selected_branch === null;
+          }
+          branch.selected = true;
+          selected_branch = branch;
+          if (branch.onSelect != null) {
+            return $timeout(function() {
+              return branch.onSelect(branch);
+            });
+          } else if (scope.onSelect != null) {
+            return $timeout(function() {
+              return scope.onSelect({
+                branch: branch
+              });
+            });
+          }
+        };
+        scope.user_select_branch = function(branch) {
+          if (branch !== selected_branch) {
+            return select_branch(branch);
+          }
+        };
+        radio_branch = function(branch) {
+          if (radioed_branch != null) {
+            radioed_branch.radio = false;
+            radioed_branch === null;
+          }
+          branch.radio = true;
+          radioed_branch = branch;
+          if (branch.onRadio != null) {
+            return $timeout(function() {
+              return branch.onRadio(branch);
+            });
+          } else if (scope.onRadio != null) {
+            return $timeout(function() {
+              return scope.onRadio({
+                branch: branch
+              });
+            });
+          }
+        };
+        scope.user_radio_branch = function(branch) {
+          if (branch !== radioed_branch) {
+            if (branch.tree_radio_icon !== attrs.iconRadioForbid) {
+              return radio_branch(branch);
+            }
+          }
+        };
+        expanded_parent = function(branch) {
+          return for_each_parent(branch, function(p, b) {
+            var child, i, len, ref, results;
+            p.visible = true;
+            p.expanded = true;
+            ref = p.children;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              child = ref[i];
+              results.push(child.visible = true);
+            }
+            return results;
+          });
+        };
+        expanded_child = function(branch) {
+          var child, i, len, ref, results;
+          branch.expanded = true;
+          if (!!branch.children && branch.children.length > 0) {
+            ref = branch.children;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              child = ref[i];
+              results.push(child.visible = true);
+            }
+            return results;
+          }
+        };
+        collapse_children = function(branch) {
+          branch.expanded = false;
+          return for_each_child(branch, function(b) {
+            b.expanded = false;
+            return b.visible = false;
+          });
+        };
+        expand_branch = function(branch) {
+          branch.expanded = !branch.expanded;
+          if (branch.expanded) {
+            return expanded_child(branch);
+          } else {
+            return collapse_children(branch);
+          }
+        };
+        scope.user_expand_branch = function(branch) {
+          if (attrs.lazyLoad && !branch.leaf && (!branch.children || branch.children.length === 0)) {
+            if (scope.loadData != null) {
+              return $timeout(function() {
+                var data, datas, i, len;
+                datas = scope.loadData({
+                  branch: branch
+                });
+                if (!datas || datas.length === 0) {
+                  return branch.leaf = true;
+                } else {
+                  for (i = 0, len = datas.length; i < len; i++) {
+                    data = datas[i];
+                    data.parent_uid = branch.uid;
+                    data.checked = branch.checked;
+                  }
+                  branch.children = datas;
+                  return expand_branch(branch);
+                }
+              });
+            } else {
+              return branch.leaf = true;
+            }
+          } else {
+            return expand_branch(branch);
+          }
+        };
+        get_checked = function() {
+          var check_array, do_f, i, len, ref, root_branch;
+          do_f = function(branch, fn) {
+            var child, i, len, ref, results;
+            if (branch.checked === c_checked) {
+              return fn(branch);
+            } else if (branch.checked === c_check_some) {
+              if (!!branch.children && branch.children.length > 0) {
+                ref = branch.children;
+                results = [];
+                for (i = 0, len = ref.length; i < len; i++) {
+                  child = ref[i];
+                  results.push(do_f(child, fn));
+                }
+                return results;
+              }
+            }
+          };
+          check_array = [];
+          ref = scope.treeData;
+          for (i = 0, len = ref.length; i < len; i++) {
+            root_branch = ref[i];
+            do_f(root_branch, function(branch) {
+              return check_array.push(branch);
+            });
+          }
+          return check_array;
+        };
+        check_children = function(branch) {
+          return for_each_child(branch, function(b) {
+            var child, i, len, ref, results;
+            b.checked = c_checked;
+            if (!!b.children && b.children.length > 0) {
+              ref = b.children;
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                child = ref[i];
+                results.push(child.checked = c_checked);
+              }
+              return results;
+            }
+          });
+        };
+        uncheck_children = function(branch) {
+          return for_each_child(branch, function(b) {
+            var child, i, len, ref, results;
+            b.checked = c_unchecked;
+            if (!!b.children && b.children.length > 0) {
+              ref = b.children;
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                child = ref[i];
+                results.push(child.checked = c_unchecked);
+              }
+              return results;
+            }
+          });
+        };
+        checker_parent = function(branch) {
+          return for_each_parent(branch, function(parent) {
+            var checked, child, children, i, len, total, unchecked;
+            children = parent.children;
+            total = children.length;
+            checked = 0;
+            unchecked = 0;
+            for (i = 0, len = children.length; i < len; i++) {
+              child = children[i];
+              if (child.checked === c_checked) {
+                checked = checked + 1;
+              } else if (child.checked === c_unchecked) {
+                unchecked = unchecked + 1;
+              }
+            }
+            if (total === checked) {
+              return parent.checked = c_checked;
+            } else if (total === unchecked) {
+              return parent.checked = c_unchecked;
+            } else {
+              return parent.checked = c_check_some;
+            }
+          });
+        };
+        scope.user_check_branch = function(branch) {
+          if (branch.checked === c_checked) {
+            branch.checked = c_unchecked;
+            uncheck_children(branch);
+          } else if (branch.checked === c_unchecked) {
+            branch.checked = c_checked;
+            check_children(branch);
+          } else {
+            branch.checked = c_checked;
+            check_children(branch);
+          }
+          checker_parent(branch);
+          if (branch.onCheck != null) {
+            return $timeout(function() {
+              return branch.onCheck(branch);
+            });
+          } else if (scope.onCheck != null) {
+            return $timeout(function() {
+              var branches;
+              branches = get_checked();
+              return scope.onCheck({
+                branches: branches
+              });
+            });
+          }
+        };
+        on_treeData_change = function() {
+          scope.tree_rows = [];
+          return for_each_branch(function(branch, parent) {
+            if (branch.uid == null) {
+              branch.uid = "" + Math.random();
+            }
+            if (branch.visible == null) {
+              if (!parent) {
+                branch.visible = true;
+              } else {
+                branch.visible = false;
+              }
+            }
+            if (branch.expanded == null) {
+              branch.expanded = false;
+            }
+            if (branch.checked == null) {
+              branch.checked = c_unchecked;
+            }
+            if (branch.radio == null) {
+              branch.radio = false;
+            }
+            if (branch.children == null) {
+              branch.children = [];
+            }
+            if (branch.leaf == null) {
+              if (attrs.lazyLoad) {
+                branch.leaf = false;
+              } else {
+                if (!branch.children || branch.children.length === 0) {
+                  branch.leaf = true;
+                } else {
+                  branch.leaf = false;
+                }
+              }
+            }
+            if (!!parent) {
+              branch.level = parent.level + 1;
+              branch.parent_uid = parent.uid;
+            } else {
+              branch.level = 1;
+            }
+            if (branch.leaf) {
+              branch.tree_icon = attrs.iconLeaf;
+            } else if (branch.expanded) {
+              branch.tree_icon = attrs.iconCollapse;
+            } else {
+              branch.tree_icon = attrs.iconExpand;
+            }
+            if (branch.checked === c_checked) {
+              branch.tree_check_icon = attrs.iconChecked;
+            } else if (branch.checked === c_unchecked) {
+              branch.tree_check_icon = attrs.iconUnchecked;
+            } else {
+              branch.tree_check_icon = attrs.iconSomeChecked;
+            }
+            if (branch.radio) {
+              branch.tree_radio_icon = attrs.iconRadioed;
+            } else if (!branch.leaf && attrs.radioOnlyLeaf) {
+              branch.tree_radio_icon = attrs.iconRadioForbid;
+            } else {
+              branch.tree_radio_icon = attrs.iconunRadioed;
+            }
+            return scope.tree_rows.push({
+              branch: branch,
+              visible: branch.visible
+            });
+          });
+        };
+        scope.$watch('treeData', on_treeData_change, true);
+        if ((attrs.initSelect != null) && !attrs.lazyLoad) {
+          uid = attrs.initSelect;
+          $timeout(function() {
+            var do_f, i, len, ref, results, root_branch;
+            do_f = function(branch) {
+              var child, i, len, ref, results;
+              if (branch.uid === uid) {
+                branch.selected = true;
+                branch.visible = true;
+                return expanded_parent(branch);
+              } else {
+                if (!!branch.children && branch.children.length > 0) {
+                  ref = branch.children;
+                  results = [];
+                  for (i = 0, len = ref.length; i < len; i++) {
+                    child = ref[i];
+                    results.push(do_f(child));
+                  }
+                  return results;
+                }
+              }
+            };
+            ref = scope.treeData;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              root_branch = ref[i];
+              results.push(do_f(root_branch));
+            }
+            return results;
+          });
+        }
+        if ((attrs.initRadio != null) && attrs.treeType === c_tree_type_radio && !attrs.lazyLoad) {
+          uid = attrs.initRadio;
+          $timeout(function() {
+            var do_f, i, len, ref, results, root_branch;
+            do_f = function(branch) {
+              var child, i, len, ref, results;
+              if (branch.uid === uid) {
+                branch.radio = true;
+                branch.selected = true;
+                branch.visible = true;
+                return expanded_parent(branch);
+              } else {
+                if (!!branch.children && branch.children.length > 0) {
+                  ref = branch.children;
+                  results = [];
+                  for (i = 0, len = ref.length; i < len; i++) {
+                    child = ref[i];
+                    results.push(do_f(child));
+                  }
+                  return results;
+                }
+              }
+            };
+            ref = scope.treeData;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              root_branch = ref[i];
+              results.push(do_f(root_branch));
+            }
+            return results;
+          });
+        }
+        if ((attrs.initCheck != null) && attrs.treeType === c_tree_type_checkbox && !attrs.lazyLoad) {
+          checkes = scope.$eval(attrs.initCheck);
+          if (!!checkes && checkes.length > 0) {
+            $timeout(function() {
+              var do_f, i, len, ref, results, root_branch;
+              do_f = function(branch) {
+                var child, i, len, results;
+                results = [];
+                for (i = 0, len = checkes.length; i < len; i++) {
+                  uid = checkes[i];
+                  if (branch.uid === uid) {
+                    branch.checked = c_checked;
+                    branch.visible = true;
+                    expanded_parent(branch);
+                    results.push(checker_parent(branch));
+                  } else {
+                    if (!!branch.children && branch.children.length > 0) {
+                      results.push((function() {
+                        var j, len1, ref, results1;
+                        ref = branch.children;
+                        results1 = [];
+                        for (j = 0, len1 = ref.length; j < len1; j++) {
+                          child = ref[j];
+                          results1.push(do_f(child));
+                        }
+                        return results1;
+                      })());
+                    } else {
+                      results.push(void 0);
+                    }
+                  }
+                }
+                return results;
+              };
+              ref = scope.treeData;
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                root_branch = ref[i];
+                results.push(do_f(root_branch));
+              }
+              return results;
+            });
+          }
+        }
+        if ((scope.treeControl != null) && angular.isObject(scope.treeControl)) {
+          tree = scope.treeControl;
+          return tree.getCheckes = function() {
+            return get_checked();
+          };
+        }
       }
     };
   }

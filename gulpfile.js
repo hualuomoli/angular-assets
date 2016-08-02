@@ -102,6 +102,9 @@ gulp.task('start', ['coffee', 'scss'], function (cb) {
 
 // watch
 gulp.task('watch', ['start'], function (cb) {
+  gulp.watch(['./src/**/*.scss', './src/**/*.sass'], ['scss']);
+  gulp.watch('./src/**/*.coffee', ['coffee']);
+
   return cb();
 })
 
