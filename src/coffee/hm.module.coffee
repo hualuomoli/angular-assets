@@ -10,6 +10,7 @@ angular.module 'hm', [
   'hm.ui.jq',
   'hm.ui.screenfull',
   'hm.ui.toggleClass',
+  'hm.ui.nav.tree',
 
   # util
   'hm.util'
