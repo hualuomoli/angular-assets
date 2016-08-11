@@ -41,56 +41,6 @@
    for both Bootstrap 2 and Bootstrap 3
 
 */
-/* ------------------------------------------
-AngularJS Animations...
-
-The first selector is for Angular 1.1.5
-The second selector is for Angular 1.2.0
-
-*/
-.abn-tree-animate-enter,
-li.nav-tree-row.ng-enter {
-  -webkit-transition: 200ms linear all;
-  transition: 200ms linear all;
-  position: relative;
-  display: block;
-  opacity: 0;
-  max-height: 0px;
-}
-
-.abn-tree-animate-enter.abn-tree-animate-enter-active,
-li.nav-tree-row.ng-enter-active {
-  opacity: 1;
-  max-height: 30px;
-}
-
-.abn-tree-animate-leave,
-li.nav-tree-row.ng-leave {
-  -webkit-transition: 200ms linear all;
-  transition: 200ms linear all;
-  position: relative;
-  display: block;
-  height: 30px;
-  max-height: 30px;
-  opacity: 1;
-}
-
-.abn-tree-animate-leave.abn-tree-animate-leave-active,
-li.nav-tree-row.ng-leave-active {
-  height: 0px;
-  max-height: 0px;
-  opacity: 0;
-}
-
-/* 
-------------------------------------------
-Angular 1.2.0 Animation 
-*/
-/*
-   end animation stuff
------------------------------------------
-   begin normal css stuff
-*/
 ul.hm-nav-tree {
   cursor: pointer;
 }
@@ -132,4 +82,34 @@ ul.hm-nav-tree li.nav-tree-row.level-5 {
 
 ul.hm-nav-tree li.nav-tree-row.level-6 {
   left: 100px;
+}
+
+ul.hm-nav-tree li.nav-tree-row.ng-enter {
+  -webkit-transition: 200ms linear all;
+  transition: 200ms linear all;
+  position: relative;
+  display: block;
+  opacity: 0;
+  max-height: 0px;
+}
+
+ul.hm-nav-tree li.nav-tree-row.ng-enter-active {
+  opacity: 1;
+  max-height: 30px;
+}
+
+ul.hm-nav-tree li.nav-tree-row.ng-leave {
+  -webkit-transition: 200ms linear all;
+  transition: 200ms linear all;
+  position: relative;
+  display: block;
+  height: 30px;
+  max-height: 30px;
+  opacity: 1;
+}
+
+ul.hm-nav-tree li.nav-tree-row.ng-leave-active {
+  height: 0px;
+  max-height: 0px;
+  opacity: 0;
 }

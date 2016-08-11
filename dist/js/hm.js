@@ -222,16 +222,8 @@ angular.module('hm.http').factory('hmHttp', [
       params = !!params ? params : {};
       return $.param(params);
     };
-    _getHeaders = function() {
-      var array, validArray;
-      array = Array.prototype.slice.call(arguments);
-      validArray = [];
-      array.forEach(function(ele) {
-        if (!!ele) {
-          return validArray[validArray.length] = ele;
-        }
-      });
-      return angular.extend({}, validArray);
+    _getHeaders = function(userHeader, httpHeader) {
+      return angular.extend({}, userHeader, httpHeader);
     };
     return {
       get: function(url, params) {
@@ -468,7 +460,7 @@ angular.module('hm.ui.nav.tree', ['ngAnimate']).directive('hmNavTree', [
   '$timeout', '$parse', function($timeout, $parse) {
     return {
       restrict: 'E',
-      template: "<ul class=\"nav nav-list nav-pills nav-stacked hm-nav-tree\">\n  <li ng-repeat=\"row in tree_rows | filter:{visible:true}\"\n      ng-class=\"'level-{{row.branch.level}}' + (row.branch.selected ? ' active':'') + ' ' +row.branch.classes.join(' ')\" \n      class=\"nav-tree-row\">\n    <a ng-click=\"user_select_branch(row.branch)\">\n      <i ng-class=\"row.branch.tree_check_icon\" \n         ng-click=\"user_check_branch(row.branch)\" \n         class=\"indented\" ng-show=\"tree_type == 'checkbox'\"> \n      </i>\n      <i ng-class=\"row.branch.tree_radio_icon\" \n         ng-click=\"user_radio_branch(row.branch)\" \n         class=\"indented\" ng-show=\"tree_type == 'radio'\"> \n      </i>\n      <i ng-class=\"row.branch.tree_icon\" \n         ng-click=\"user_expand_branch(row.branch)\" \n         class=\"indented\"> \n      </i>\n      <span class=\"indented tree-label\">{{ row.branch.label }} </span>\n    </a>\n  </li>\n</ul>",
+      template: "<ul class=\"nav nav-list nav-pills nav-stacked hm-nav-tree\">\n  <li ng-repeat=\"row in tree_rows | filter:{visible:true} track by row.branch.uid\"\n      ng-class=\"'level-{{row.branch.level}}' + (row.branch.selected ? ' active':'') + ' ' +row.branch.classes.join(' ')\" \n      class=\"nav-tree-row\">\n    <a ng-click=\"user_select_branch(row.branch)\">\n      <i ng-class=\"row.branch.tree_check_icon\" \n         ng-click=\"user_check_branch(row.branch)\" \n         class=\"indented\" ng-show=\"tree_type == 'checkbox'\"> \n      </i>\n      <i ng-class=\"row.branch.tree_radio_icon\" \n         ng-click=\"user_radio_branch(row.branch)\" \n         class=\"indented\" ng-show=\"tree_type == 'radio'\"> \n      </i>\n      <i ng-class=\"row.branch.tree_icon\" \n         ng-click=\"user_expand_branch(row.branch)\" \n         class=\"indented\"> \n      </i>\n      <span class=\"indented tree-label\">{{ row.branch.label }} </span>\n    </a>\n  </li>\n</ul>",
       scope: {
         treeData: '=',
         onSelect: '&',
@@ -662,8 +654,8 @@ angular.module('hm.ui.nav.tree', ['ngAnimate']).directive('hmNavTree', [
         collapse_children = function(branch) {
           branch.expanded = false;
           return for_each_child(branch, function(b) {
-            b.expanded = false;
-            return b.visible = false;
+            b.visible = false;
+            return b.expanded = false;
           });
         };
         expand_branch = function(branch) {
