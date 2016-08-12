@@ -166,13 +166,13 @@ angular.module('hm', ['hm.device', 'hm.log', 'hm.http', 'hm.resource', 'hm.ui.lo
 
 angular.module('hm.device', []);
 
-angular.module('hm.http', []);
-
 angular.module('hm.log', []);
 
 angular.module('hm.resource', []);
 
 angular.module('hm.ui.load', []);
+
+angular.module('hm.http', []);
 
 angular.module('hm').provider('hm', [
   function() {
@@ -198,76 +198,6 @@ angular.module('hm.device').factory('hmDevice', [
         var ua;
         ua = $window['navigator']['userAgent'] || $window['navigator']['vendor'] || $window['opera'];
         return /iPhone|iPod|iPad|Silk|Android|BlackBerry|Opera Mini|IEMobile/.test(ua);
-      }
-    };
-  }
-]);
-
-
-/*
- * http处理
- * get
- * post --> application/x-www-form-urlencoded
- * put  --> application/x-www-form-urlencoded
- * delete
- * payload --> application/json
- */
-angular.module('hm.http').factory('hmHttp', [
-  '$http', 'hm', function($http, hm) {
-    var _getHeaders, _getUrl, _seriliz;
-    _getUrl = function(url) {
-      return hm.defaults.serverUrl + url;
-    };
-    _seriliz = function(params) {
-      params = !!params ? params : {};
-      return $.param(params);
-    };
-    _getHeaders = function(userHeader, httpHeader) {
-      return angular.extend({}, userHeader, httpHeader);
-    };
-    return {
-      get: function(url, params) {
-        return $http({
-          method: 'GET',
-          url: _getUrl(url),
-          params: params
-        });
-      },
-      post: function(url, params, headers) {
-        return $http({
-          method: 'POST',
-          url: _getUrl(url),
-          data: _seriliz(params),
-          headers: _getHeaders(headers, {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          })
-        });
-      },
-      put: function(url, params, headers) {
-        return $http({
-          method: 'PUT',
-          url: _getUrl(url),
-          data: _seriliz(params),
-          headers: _getHeaders(headers, {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          })
-        });
-      },
-      payload: function(url, params, headers) {
-        return $http({
-          method: 'POST',
-          url: _getUrl(url),
-          data: params,
-          headers: _getHeaders(headers, {
-            'Content-Type': 'application/json'
-          })
-        });
-      },
-      "delete": function(url) {
-        return $http({
-          method: 'DELETE',
-          url: _getUrl(url)
-        });
       }
     };
   }
@@ -320,6 +250,124 @@ angular.module('hm.resource').factory('hmResource', [
           return deferred.resolve(datas);
         }), 100);
         return promise;
+      }
+    };
+  }
+]);
+
+
+/*
+ * http处理
+ * get
+ * post --> application/x-www-form-urlencoded
+ * put  --> application/x-www-form-urlencoded
+ * delete
+ * payload --> application/json
+ */
+angular.module('hm.http').factory('hmHttp', [
+  '$http', 'hm', function($http, hm) {
+    var _headers, getHeaders, getSerilizParams, getUrl;
+    _headers = {};
+    getSerilizParams = function(params) {
+      params = !!params ? params : {};
+      return $.param(params);
+    };
+    getHeaders = function(httpHeader) {
+      if (!!httpHeader) {
+        return angular.extend({}, _headers, httpHeader);
+      } else {
+        return angular.extend({}, _headers);
+      }
+    };
+    getUrl = function(url, params) {
+      var do_f, newUrl;
+      do_f = function(url, fn) {
+        var e, key, s, u, value;
+        s = url.indexOf('{');
+        e = url.indexOf('}');
+        if (s < 0 || e < 0) {
+          return fn(url);
+        } else {
+          key = url.substring(s + 1, e);
+          value = params[key];
+          if (!key) {
+            throw new Error('can not find param ' + key);
+          }
+          delete params[key];
+          u = url.substring(0, s) + value + url.substring(e + 1);
+          return do_f(u, fn);
+        }
+      };
+      newUrl = url;
+      if (!!params) {
+        do_f(url, function(n) {
+          return newUrl = n;
+        });
+      }
+      return hm.defaults.serverUrl + newUrl;
+    };
+    return {
+      setHeader: function(headers) {
+        return _headers = headers;
+      },
+      get: function(url, params) {
+        var headers;
+        url = getUrl(url, params);
+        headers = getHeaders();
+        return $http({
+          method: 'GET',
+          url: url,
+          params: params,
+          headers: headers
+        });
+      },
+      post: function(url, params) {
+        var headers;
+        url = getUrl(url, params);
+        params = getSerilizParams(params);
+        headers = getHeaders({
+          'Content-Type': 'application/x-www-form-urlencoded'
+        });
+        return $http({
+          method: 'POST',
+          url: url,
+          data: params,
+          headers: headers
+        });
+      },
+      put: function(url, params, headers) {
+        url = getUrl(url, params);
+        params = getSerilizParams(params);
+        headers = getHeaders({
+          'Content-Type': 'application/x-www-form-urlencoded'
+        });
+        return $http({
+          method: 'PUT',
+          url: url,
+          data: params,
+          headers: headers
+        });
+      },
+      payload: function(url, params, headers) {
+        url = getUrl(url, params);
+        headers = getHeaders({
+          'Content-Type': 'application/json'
+        });
+        return $http({
+          method: 'POST',
+          url: url,
+          data: params,
+          headers: headers
+        });
+      },
+      "delete": function(url) {
+        var headers;
+        url = getUrl(url, params);
+        headers = getHeaders();
+        return $http({
+          method: 'DELETE',
+          url: url
+        });
       }
     };
   }
