@@ -37,6 +37,7 @@ gulp.task('coffee', function () {
       './src/coffee/**/*.provider.coffee', // provider
       './src/coffee/**/*.factory.coffee', // factory
       './src/coffee/**/*.service.coffee', // service
+      './src/coffee/**/*.interceptor.coffee', // interceptor
       './src/coffee/directives/*.coffee', // directive
     ])
     // coffee

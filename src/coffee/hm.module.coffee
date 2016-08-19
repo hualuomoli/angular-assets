@@ -4,6 +4,7 @@ angular.module 'hm', [
   'hm.log',
   'hm.http',
   'hm.resource',
+  'hm.app',
 
   # ui
   'hm.ui.load',

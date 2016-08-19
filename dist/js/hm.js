@@ -162,17 +162,23 @@ angular.module('hm.util', []).factory('hmUtils', [
   }
 ]);
 
-angular.module('hm', ['hm.device', 'hm.log', 'hm.http', 'hm.resource', 'hm.ui.load', 'hm.ui.jq', 'hm.ui.screenfull', 'hm.ui.toggleClass', 'hm.ui.nav.tree', 'hm.util']);
+angular.module('hm', ['hm.device', 'hm.log', 'hm.http', 'hm.resource', 'hm.app', 'hm.ui.load', 'hm.ui.jq', 'hm.ui.screenfull', 'hm.ui.toggleClass', 'hm.ui.nav.tree', 'hm.util']);
+
+
+/*
+ * 应用
+ */
+angular.module('hm.app', ['hm.log']);
 
 angular.module('hm.device', []);
 
-angular.module('hm.log', []);
+angular.module('hm.http', ['hm.log']);
 
 angular.module('hm.resource', []);
 
-angular.module('hm.ui.load', []);
+angular.module('hm.log', []);
 
-angular.module('hm.http', []);
+angular.module('hm.ui.load', []);
 
 angular.module('hm').provider('hm', [
   function() {
@@ -198,58 +204,6 @@ angular.module('hm.device').factory('hmDevice', [
         var ua;
         ua = $window['navigator']['userAgent'] || $window['navigator']['vendor'] || $window['opera'];
         return /iPhone|iPod|iPad|Silk|Android|BlackBerry|Opera Mini|IEMobile/.test(ua);
-      }
-    };
-  }
-]);
-
-angular.module('hm.log').factory('hmLog', [
-  '$log', function($log) {
-    return {
-      debug: function() {
-        if ($log.isDebugEnabled()) {
-          return $log.debug(arguments);
-        }
-      },
-      info: function() {
-        if ($log.isInfoEnabled()) {
-          return $log.info(arguments);
-        }
-      },
-      warn: function() {
-        if ($log.isWarnEnabled()) {
-          return $log.warn(arguments);
-        }
-      },
-      error: function() {
-        return $log.error(arguments);
-      },
-      log: function() {
-        if ($log.isDebugEnabled()) {
-          return $log.debug(arguments);
-        }
-      }
-    };
-  }
-]);
-
-angular.module('hm.resource').factory('hmResource', [
-  '$q', '$timeout', function($q, $timeout) {
-    return {
-      load: function(datas) {
-        var deferred, promise;
-        deferred = $q.defer();
-        promise = deferred.promise;
-        promise.success = function(fn) {
-          return promise.then(fn);
-        };
-        promise.error = function(fn) {
-          return promise.then(null, fn);
-        };
-        $timeout((function() {
-          return deferred.resolve(datas);
-        }), 100);
-        return promise;
       }
     };
   }
@@ -373,6 +327,54 @@ angular.module('hm.http').factory('hmHttp', [
   }
 ]);
 
+angular.module('hm.resource').factory('hmResource', [
+  '$q', '$timeout', function($q, $timeout) {
+    return {
+      load: function(datas) {
+        var deferred, promise;
+        deferred = $q.defer();
+        promise = deferred.promise;
+        promise.success = function(fn) {
+          return promise.then(fn);
+        };
+        promise.error = function(fn) {
+          return promise.then(null, fn);
+        };
+        $timeout((function() {
+          return deferred.resolve(datas);
+        }), 100);
+        return promise;
+      }
+    };
+  }
+]);
+
+
+/*
+ *
+ */
+angular.module('hm.log').factory('hmLog', [
+  '$log', function($log) {
+    return {
+      debug: function() {
+        return $log.debug(arguments);
+      },
+      info: function() {
+        return $log.info(arguments);
+      },
+      warn: function() {
+        return $log.warn(arguments);
+      },
+      error: function() {
+        return $log.error(arguments);
+      },
+      log: function() {
+        return $log.debug(arguments);
+      }
+    };
+  }
+]);
+
 angular.module('hm.ui.load').factory('hmUiLoad', [
   '$q', '$timeout', '$document', function($q, $timeout, $document) {
     var _loaded;
@@ -441,6 +443,30 @@ angular.module('hm.ui.load').factory('hmUiLoad', [
         });
         deferred.resolve();
         return promise;
+      }
+    };
+  }
+]);
+
+
+/*
+ *
+ */
+angular.module('hm.app').factory('AppInterceptor', [
+  '$q', 'hmLog', '$rootScope', function($q, hmLog, $rootScope) {
+    return {
+      responseError: function(res) {
+        if (res.status === 401) {
+          hmLog.warn('用户未登录或已超时(HmAppUnauthorized)', res);
+          $rootScope.$emit("HmAppUnauthorized", res);
+        } else if (res.status === 500) {
+          hmLog.error('服务器运行错误(HmAppServerError)', res);
+          $rootScope.$emit("HmAppServerError", res);
+        } else {
+          hmLog.error('其他错误(HmAppError)', res);
+        }
+        $rootScope.$emit("HmAppError", res);
+        return $q.reject(res);
       }
     };
   }

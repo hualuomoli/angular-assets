@@ -1,1 +1,3 @@
-angular.module 'hm.http',[]
+angular.module 'hm.http',[
+  'hm.log'
+]
