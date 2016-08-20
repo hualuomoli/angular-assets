@@ -9,7 +9,6 @@ angular.module 'hm', [
   # ui
   'hm.ui.load',
   'hm.ui.jq',
-  'hm.ui.screenfull',
   'hm.ui.toggleClass',
   'hm.ui.nav.tree',
 
