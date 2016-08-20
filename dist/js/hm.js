@@ -174,9 +174,9 @@ angular.module('hm.device', []);
 
 angular.module('hm.http', ['hm.log']);
 
-angular.module('hm.resource', []);
-
 angular.module('hm.log', []);
+
+angular.module('hm.resource', []);
 
 angular.module('hm.ui.load', []);
 
@@ -327,28 +327,6 @@ angular.module('hm.http').factory('hmHttp', [
   }
 ]);
 
-angular.module('hm.resource').factory('hmResource', [
-  '$q', '$timeout', function($q, $timeout) {
-    return {
-      load: function(datas) {
-        var deferred, promise;
-        deferred = $q.defer();
-        promise = deferred.promise;
-        promise.success = function(fn) {
-          return promise.then(fn);
-        };
-        promise.error = function(fn) {
-          return promise.then(null, fn);
-        };
-        $timeout((function() {
-          return deferred.resolve(datas);
-        }), 100);
-        return promise;
-      }
-    };
-  }
-]);
-
 
 /*
  *
@@ -370,6 +348,28 @@ angular.module('hm.log').factory('hmLog', [
       },
       log: function() {
         return $log.debug(arguments);
+      }
+    };
+  }
+]);
+
+angular.module('hm.resource').factory('hmResource', [
+  '$q', '$timeout', function($q, $timeout) {
+    return {
+      load: function(datas) {
+        var deferred, promise;
+        deferred = $q.defer();
+        promise = deferred.promise;
+        promise.success = function(fn) {
+          return promise.then(fn);
+        };
+        promise.error = function(fn) {
+          return promise.then(null, fn);
+        };
+        $timeout((function() {
+          return deferred.resolve(datas);
+        }), 100);
+        return promise;
       }
     };
   }
@@ -1058,41 +1058,6 @@ angular.module('hm.ui.nav.tree', ['ngAnimate']).directive('hmNavTree', [
             return get_checked();
           };
         }
-      }
-    };
-  }
-]);
-
-
-/*
- * 全屏
- */
-angular.module('hm.ui.screenfull', ['hm.ui.load']).directive('hmUiScreenfull', [
-  'hmUiLoad', 'ASSETS_LIB', '$document', function(hmUiLoad, ASSETS_LIB, $document) {
-    return {
-      restrict: 'AC',
-      template: '<i class="fa fa-expand fa-fw text"></i><i class="fa fa-compress fa-fw text-active"></i>',
-      link: function(scope, ele, attrs) {
-        ele.addClass('hide');
-        return hmUiLoad.load(ASSETS_LIB.screenfull).then(function() {
-          var screenfull;
-          screenfull = window.screenfull;
-          if (screenfull.enabled && !navigator.userAgent.match(/Trident.*rv:11\./)) {
-            ele.removeClass('hide');
-          }
-          ele.on('click', function() {
-            var target;
-            attrs.target && (target = $(attrs.target)[0]);
-            return screenfull.toggle(target);
-          });
-          return $document.on(screenfull.raw.fullscreenchange, function() {
-            if (screenfull.isFullscreen) {
-              return ele.addClass('active');
-            } else {
-              return ele.removeClass('active');
-            }
-          });
-        });
       }
     };
   }
